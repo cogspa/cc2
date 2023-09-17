@@ -34,8 +34,9 @@ PANEL_BORDER_COLOR = (0, 0, 0)
 sequence_number = 1
 
 
-colWidth = (WIDTH - (NUM_COLUMNS + 1) * GUTTER_SIZE) / NUM_COLUMNS
-rowHeight = (HEIGHT - (NUM_ROWS + 1) * GUTTER_SIZE) / NUM_ROWS
+colWidth = round((WIDTH - (NUM_COLUMNS + 1) * GUTTER_SIZE) / NUM_COLUMNS)
+rowHeight = round((HEIGHT - (NUM_ROWS + 1) * GUTTER_SIZE) / NUM_ROWS)
+
 occupied = [[False for _ in range(NUM_COLUMNS)] for _ in range(NUM_ROWS)]
 
 img = Image.new("RGB", (WIDTH, HEIGHT), BG_COLOR)
@@ -54,6 +55,36 @@ def canPlacePanel(col, row, colSpan, rowSpan):
 def random_color():
     """Return a random RGB color."""
     return (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+def random_line_pattern(draw, x, y, w, h):
+    """Fill the area with random line patterns."""
+    num_lines = random.randint(5, 15)
+    line_width = random.randint(1, 5)
+    spacing = random.randint(5, 20)
+    vertical = random.choice([True, False])
+    
+    if vertical:
+        for i in range(num_lines):
+            start_x = x + i * spacing
+            if start_x > x + w:
+                break
+            draw.line([(start_x, y), (start_x, y+h)], fill=random_color(), width=line_width)
+    else:
+        for i in range(num_lines):
+            start_y = y + i * spacing
+            if start_y > y + h:
+                break
+            draw.line([(x, start_y), (x+w, start_y)], fill=random_color(), width=line_width)
+
+def random_dot_pattern(draw, x, y, w, h):
+    """Fill the area with random dot patterns."""
+    num_dots = random.randint(50, 200)
+    for _ in range(num_dots):
+        dot_x = x + random.randint(0, w)
+        dot_y = y + random.randint(0, h)
+        dot_radius = random.randint(1, 5)
+        draw.ellipse([(dot_x-dot_radius, dot_y-dot_radius), 
+                      (dot_x+dot_radius, dot_y+dot_radius)], 
+                      fill=random_color(), outline=None)
 
 
 def createPanel(col, row, colSpan, rowSpan):
@@ -78,6 +109,13 @@ def createPanel(col, row, colSpan, rowSpan):
     for r in range(row, row + rowSpan):
         for c in range(col, col + colSpan):
             occupied[r][c] = True
+
+    pattern_type = random.choice(["line", "dot"])
+    if pattern_type == "line":
+        random_line_pattern(draw, x, y, w, h)
+    elif pattern_type == "dot":
+        random_dot_pattern(draw, x, y, w, h)
+
 
 def generateLayout():
     for row in range(NUM_ROWS):
